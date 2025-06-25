@@ -36,6 +36,20 @@ if (menuBtn && navLinks) {
             if (menuBtn) menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
         });
     });
+
+    // Mobile Menu - close on outside click or resize
+    document.addEventListener('click', (e) => {
+        if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
+            navLinks.classList.remove('active');
+            menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+    });
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navLinks.classList.remove('active');
+            menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+    });
 }
 
 // Smooth Scrolling
@@ -141,12 +155,12 @@ const suggestions = document.querySelectorAll('.suggestion');
 
 const chatResponses = {
     "about you": "I'm Shivam Sharma, an AI/ML student passionate about deep learning, computer vision, and ethical AI. Check my projects for more!",
-    "projects": "📁 I’ve worked on BoardPrep (a study app), AI Law Chatbot, and Dermaware (skin health concept). See the Projects section!",
-    "skills": "🛠️ I’m skilled in Python, TensorFlow, OpenCV, Firebase, LangChain, and more. See the Skills section!",
+    "projects": "📁 I've worked on BoardPrep (a study app), AI Law Chatbot, and Dermaware (skin health concept). See the Projects section!",
+    "skills": "🛠️ I'm skilled in Python, TensorFlow, OpenCV, Firebase, LangChain, and more. See the Skills section!",
     "contact": "📬 You can reach me via the Contact form or email: shivam17sharma2004@gmail.com. You can also call me at: 9330087464.",
     "hello": "👋 Hello! What can I help you with today?",
     "hi": "👋 Hi there! How can I assist you?",
-    "default": "❗ Sorry, I didn’t understand that. Try asking about my projects, skills, or contact info!"
+    "default": "❗ Sorry, I didn't understand that. Try asking about my projects, skills, or contact info!"
 };
 
 if (chatToggle && chatbot && chatClose && chatInput && chatSend && chatMessages) {
@@ -175,6 +189,42 @@ if (chatToggle && chatbot && chatClose && chatInput && chatSend && chatMessages)
             }
         });
     });
+}
+
+// Chatbot: Make draggable on mobile
+if (chatbot) {
+    let isDragging = false, startX, startY, startLeft, startTop;
+    const header = chatbot.querySelector('.chat-header');
+    const dragStart = (e) => {
+        isDragging = true;
+        chatbot.style.transition = 'none';
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        const rect = chatbot.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        document.body.style.userSelect = 'none';
+    };
+    const dragMove = (e) => {
+        if (!isDragging) return;
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        chatbot.style.left = (startLeft + (x - startX)) + 'px';
+        chatbot.style.top = (startTop + (y - startY)) + 'px';
+    };
+    const dragEnd = () => {
+        isDragging = false;
+        chatbot.style.transition = '';
+        document.body.style.userSelect = '';
+    };
+    if (header) {
+        header.addEventListener('mousedown', dragStart);
+        header.addEventListener('touchstart', dragStart);
+    }
+    document.addEventListener('mousemove', dragMove);
+    document.addEventListener('touchmove', dragMove);
+    document.addEventListener('mouseup', dragEnd);
+    document.addEventListener('touchend', dragEnd);
 }
 
 function sendMessage() {
@@ -224,3 +274,161 @@ const lazyLoad = new IntersectionObserver((entries, observer) => {
 }, { threshold: 0.1 });
 
 lazyImages.forEach(img => lazyLoad.observe(img));
+
+// --- Scroll-Based Progress Indicator ---
+if (!document.getElementById('scroll-progress')) {
+  const progressBar = document.createElement('div');
+  progressBar.id = 'scroll-progress';
+  progressBar.style.position = 'fixed';
+  progressBar.style.top = '0';
+  progressBar.style.left = '0';
+  progressBar.style.width = '0%';
+  progressBar.style.height = '4px';
+  progressBar.style.background = 'linear-gradient(90deg, #00f2fe, #6e48aa)';
+  progressBar.style.zIndex = '3000';
+  progressBar.style.transition = 'width 0.2s cubic-bezier(0.4,0,0.2,1)';
+  document.body.appendChild(progressBar);
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = (scrollTop / docHeight) * 100;
+    progressBar.style.width = scrolled + '%';
+  });
+}
+
+// --- Parallax Effects ---
+window.addEventListener('scroll', () => {
+  // Parallax for hero background
+  const heroBg = document.querySelector('.hero-bg');
+  if (heroBg) {
+    const offset = window.scrollY * 0.3;
+    heroBg.style.transform = `translateY(${offset}px)`;
+  }
+  // Parallax for about image
+  const aboutImg = document.querySelector('.about-image');
+  if (aboutImg) {
+    const offset = window.scrollY * 0.1;
+    aboutImg.style.transform = `translateY(${offset}px)`;
+  }
+});
+
+// --- Floating Particles Background ---
+(function() {
+  const canvas = document.getElementById('bg-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w = window.innerWidth, h = window.innerHeight;
+  let dpr = window.devicePixelRatio || 1;
+  let particles = [];
+  const PARTICLE_COUNT = Math.floor(Math.max(40, w * 0.025));
+  function resize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  function randomColor() {
+    const colors = ['#00f2fe', '#6e48aa', '#9d50bb', '#2ec4f1'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+  function createParticles() {
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: 2 + Math.random() * 2.5,
+        dx: (Math.random() - 0.5) * 0.7,
+        dy: (Math.random() - 0.5) * 0.7,
+        color: randomColor()
+      });
+    }
+  }
+  createParticles();
+  window.addEventListener('resize', createParticles);
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    // Draw lines between close particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (dist < 120) {
+          ctx.save();
+          ctx.globalAlpha = 0.12 * (1 - dist / 120);
+          ctx.strokeStyle = a.color;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+    // Draw particles
+    for (const p of particles) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  function animate() {
+    for (const p of particles) {
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0 || p.x > w) p.dx *= -1;
+      if (p.y < 0 || p.y > h) p.dy *= -1;
+    }
+    draw();
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// --- Animated Counters for Fun Facts ---
+(function() {
+  const counters = document.querySelectorAll('.counter');
+  let animated = false;
+  if (!counters.length) return;
+  function animateCounters() {
+    if (animated) return;
+    counters.forEach(counter => {
+      const target = +counter.getAttribute('data-target');
+      let count = 0;
+      const step = Math.ceil(target / 60);
+      function update() {
+        count += step;
+        if (count > target) count = target;
+        counter.textContent = count;
+        if (count < target) requestAnimationFrame(update);
+      }
+      update();
+    });
+    animated = true;
+  }
+  // Use IntersectionObserver for best performance
+  const section = document.getElementById('fun-facts');
+  if (section) {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        animateCounters();
+        observer.disconnect();
+      }
+    }, { threshold: 0.3 });
+    observer.observe(section);
+  }
+})();
